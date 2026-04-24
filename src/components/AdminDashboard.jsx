@@ -40,14 +40,23 @@ function weekLabel(weeksAgo) {
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
+    const [scores, setScores] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+        const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
             setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
+        const unsubscribeScores = onSnapshot(collection(db, "scores"), (snapshot) => {
+            setScores(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             setLoading(false);
         });
-        return () => unsubscribe();
+
+        return () => {
+            unsubscribeUsers();
+            unsubscribeScores();
+        };
     }, []);
 
     if (loading) {
@@ -82,10 +91,37 @@ export default function AdminDashboard() {
             games: u.gamesPlayed ?? 0,
         }));
 
+    const today = new Date();
+    const sessionsByDay = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() - (6 - i));
+        const label = d.toLocaleDateString(undefined, { weekday: "short" });
+        return { key: d.toDateString(), label, count: 0 };
+    });
+
+    scores.forEach((s) => {
+        const dateValue = s.sessionEndAtIso || s.sessionStartAtIso;
+        if (!dateValue) return;
+        const key = new Date(dateValue).toDateString();
+        const bucket = sessionsByDay.find((d) => d.key === key);
+        if (bucket) bucket.count += 1;
+    });
+
+    const sessionsTrendData = sessionsByDay.map(({ label, count }) => ({ label, count }));
+
+    const topSessionScoresData = [...scores]
+        .filter((s) => Number.isFinite(Number(s.score)))
+        .sort((a, b) => Number(b.score) - Number(a.score))
+        .slice(0, 8)
+        .map((s, idx) => ({
+            label: (s.playerName || `P${idx + 1}`).slice(0, 9),
+            score: Number(s.score || 0),
+        }));
+
     const totalUsers = users.length;
-    const totalGames = users.reduce((sum, u) => sum + (u.gamesPlayed ?? 0), 0);
-    const avgScore = users.length
-        ? Math.round(users.reduce((sum, u) => sum + (u.highscore ?? 0), 0) / users.length)
+    const totalGames = scores.length;
+    const avgScore = scores.length
+        ? Math.round(scores.reduce((sum, s) => sum + Number(s.score || 0), 0) / scores.length)
         : 0;
 
     return (
@@ -112,20 +148,20 @@ export default function AdminDashboard() {
 
             <div className="charts-grid">
                 <BarChart
-                    data={newUsersData}
+                    data={sessionsTrendData}
                     valueKey="count"
                     labelKey="label"
                     color="var(--secondary)"
-                    title="New Players per Week"
-                    subtitle="Registrations over last 5 weeks"
+                    title="Game Sessions (Last 7 Days)"
+                    subtitle="Live telemetry from Unity sessions"
                 />
                 <BarChart
-                    data={topPlayersData}
-                    valueKey="games"
+                    data={topSessionScoresData.length ? topSessionScoresData : topPlayersData}
+                    valueKey={topSessionScoresData.length ? "score" : "games"}
                     labelKey="label"
                     color="var(--accent)"
-                    title="Most Active Players"
-                    subtitle="Total games played"
+                    title={topSessionScoresData.length ? "Top Session Scores" : "Most Active Players"}
+                    subtitle={topSessionScoresData.length ? "Highest recorded Unity session scores" : "Total games played"}
                 />
             </div>
         </div>

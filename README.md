@@ -63,3 +63,36 @@ admin@admin.com
 Github Link
 
 https://github.com/NickTAM1/WebT4A1.git
+
+Unity Telemetry Bridge (WebGL)
+
+The React portal now listens for telemetry events from the embedded Unity iframe and writes them to Firestore in real-time.
+
+Expected message from Unity to parent page:
+
+```js
+window.parent.postMessage({
+	type: "game-telemetry", // also supports: game-over, game-session-end, score-update
+	sessionId: "optional-unique-id",
+	score: 25,
+	pipesPassed: 25,
+	clicks: 43,
+	startTime: new Date(gameStartMs).toISOString(),
+	endTime: new Date().toISOString(),
+	durationSeconds: 71
+}, "*");
+```
+
+Saved Firestore fields in `scores` include:
+
+- `userId` (current logged-in Firebase user)
+- `score`
+- `sessionStartAtIso` and `sessionEndAtIso`
+- `pipesPassed` and `clicks`
+- `durationSeconds`
+
+The user document in `users/{uid}` is also updated on each session:
+
+- `highscore`
+- `gamesPlayed`
+- `lastPlayedAt`

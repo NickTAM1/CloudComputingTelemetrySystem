@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    doc,
+    increment,
+    onSnapshot,
+    runTransaction,
+    serverTimestamp,
+} from "firebase/firestore";
 import UserScreen from "./UserScreen";
 import AdminDashboard from "./AdminDashboard";
 
@@ -28,6 +36,69 @@ export default function GamePortal({ user, userData: initialUserData }) {
     const iframeRef = useRef(null);
     const retryTimer = useRef(null);
     const authAcknowledged = useRef(false);
+    const seenSessionIds = useRef(new Set());
+
+    const persistTelemetry = useCallback(async (rawPayload) => {
+        if (!user?.uid || !rawPayload) return;
+
+        const score = Number(rawPayload.score ?? rawPayload.finalScore ?? 0);
+        if (!Number.isFinite(score) || score < 0) return;
+
+        const sessionId = String(
+            rawPayload.sessionId ||
+            rawPayload.gameSessionId ||
+            `${user.uid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        );
+
+        if (seenSessionIds.current.has(sessionId)) return;
+        seenSessionIds.current.add(sessionId);
+
+        const nowIso = new Date().toISOString();
+        const sessionStartIso = rawPayload.startTime || rawPayload.startedAt || nowIso;
+        const sessionEndIso = rawPayload.endTime || rawPayload.endedAt || nowIso;
+
+        const parsedStart = new Date(sessionStartIso);
+        const parsedEnd = new Date(sessionEndIso);
+        const startDate = Number.isNaN(parsedStart.getTime()) ? new Date() : parsedStart;
+        const endDate = Number.isNaN(parsedEnd.getTime()) ? new Date() : parsedEnd;
+        const durationSeconds = Number(
+            rawPayload.durationSeconds ??
+            rawPayload.duration ??
+            Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 1000))
+        );
+
+        const gameplayMetric = Number(rawPayload.pipesPassed ?? rawPayload.pipes ?? 0);
+        const clicks = Number(rawPayload.clicks ?? rawPayload.totalClicks ?? 0);
+
+        await addDoc(collection(db, "scores"), {
+            sessionId,
+            userId: user.uid,
+            playerName: userData?.displayname || user.displayName || user.email || "Player",
+            playerPhoto: user.photoURL || null,
+            score,
+            pipesPassed: Number.isFinite(gameplayMetric) ? gameplayMetric : 0,
+            clicks: Number.isFinite(clicks) ? clicks : 0,
+            durationSeconds: Number.isFinite(durationSeconds) ? Math.max(0, durationSeconds) : 0,
+            sessionStartAtIso: startDate.toISOString(),
+            sessionEndAtIso: endDate.toISOString(),
+            source: "unity-webgl",
+            createdAt: serverTimestamp(),
+        });
+
+        const userRef = doc(db, "users", user.uid);
+        await runTransaction(db, async (transaction) => {
+            const snapshot = await transaction.get(userRef);
+            if (!snapshot.exists()) return;
+            const existing = snapshot.data() || {};
+            const nextHigh = Math.max(Number(existing.highscore ?? 0), score);
+
+            transaction.update(userRef, {
+                highscore: nextHigh,
+                gamesPlayed: increment(1),
+                lastPlayedAt: serverTimestamp(),
+            });
+        });
+    }, [user, userData]);
 
     const sendAuthToGame = useCallback(async () => {
         if (!iframeRef.current?.contentWindow || !user || authAcknowledged.current) return;
@@ -49,6 +120,8 @@ export default function GamePortal({ user, userData: initialUserData }) {
 
     useEffect(() => {
         const handleMessage = (event) => {
+            if (event.source !== iframeRef.current?.contentWindow) return;
+
             if (event.data?.type === "firebase-auth-ack") {
                 console.log("Game acknowledged successful");
                 authAcknowledged.current = true;
@@ -56,11 +129,27 @@ export default function GamePortal({ user, userData: initialUserData }) {
                     clearInterval(retryTimer.current);
                     retryTimer.current = null;
                 }
+                return;
+            }
+
+            const type = event.data?.type;
+            const looksLikeTelemetry = (
+                type === "game-telemetry" ||
+                type === "game-over" ||
+                type === "game-session-end" ||
+                type === "score-update" ||
+                (event.data && (event.data.score !== undefined || event.data.finalScore !== undefined))
+            );
+
+            if (looksLikeTelemetry) {
+                persistTelemetry(event.data).catch((err) => {
+                    console.error("Failed to persist telemetry", err);
+                });
             }
         };
         window.addEventListener("message", handleMessage);
         return () => window.removeEventListener("message", handleMessage);
-    }, []);
+    }, [persistTelemetry]);
 
     const handleGameLoaded = useCallback(() => {
         setGameLoaded(true);
