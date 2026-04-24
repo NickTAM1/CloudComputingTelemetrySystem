@@ -50,7 +50,7 @@ export default function LeaderBoard({currentUserId}) {
 
 return (
     <div className="leaderboard-card">
-     <div className="leaderboard-header">
+     <div className="card-header">
         <h2 className="card-title">Leaderboard</h2>
         <div className="card-badge">Top {LEADERBOARD_LIMIT}</div>
      </div>
@@ -60,7 +60,7 @@ return (
             <div className="leaderboard-list">
                 {leaders.map((player, index) => {
                     const isCurrentUser = player.id === currentUserId;
-                    const rankClass = 
+                    const rankClass =
                         index === 0 ? "rank-gold" : index === 1 ? "rank-silver" : index === 2 ? "rank-bronze" : "";
                     return (
                         <div key={player.id} className={`leaderboard-row ${isCurrentUser ? "is-you" : ""}`}>

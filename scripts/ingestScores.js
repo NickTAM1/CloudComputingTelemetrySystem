@@ -34,8 +34,8 @@ try {
         envVars[key] = value;
     }
     //console.log(envVars);
-} catch {
-    console.error("Error reading .env file");
+} catch (error) {
+    console.error("Error");
 }
 
 const firebaseConfig = {

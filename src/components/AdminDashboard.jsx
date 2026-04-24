@@ -41,7 +41,6 @@ function weekLabel(weeksAgo) {
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [nowMs] = useState(() => Date.now());
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
@@ -64,7 +63,7 @@ export default function AdminDashboard() {
     users.forEach(u => {
         if (!u.createdAt?.seconds) return;
         const weeksAgo = Math.floor(
-            (nowMs - u.createdAt.seconds * 1000) / (7 * 24 * 60 * 60 * 1000)
+            (Date.now() - u.createdAt.seconds * 1000) / (7 * 24 * 60 * 60 * 1000)
         );
         if (weeksAgo >= 0 && weeksAgo < 5) {
             weekBuckets[weeksAgo].count += 1;

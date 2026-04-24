@@ -80,7 +80,7 @@ export default function LoginForm() {
                         <label htmlFor="password">Password</label>
                         <input id="password" type="password" placeholder="min. 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
                     </div>
-                    {error && <p className="error-message">{error}</p> }
+                    {error && <p className="error">{error}</p> }
 
                     <button type="submit" className="btn-primary" disabled={loading}>
                         {loading ? "Please wait..." : (isRegistering) ? "Create Account" : "Sign In"}
