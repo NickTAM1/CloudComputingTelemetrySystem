@@ -1,16 +1,65 @@
-# React + Vite
+NotBeetleball — Game Web App(A1 Version)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + Firebase web app where players can log in, check the leaderboard, play an embedded game, and (for admins) view analytics dashboards.
 
-Currently, two official plugins are available:
+Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Prerequisites
 
-## React Compiler
+- [Node.js](https://nodejs.org/) v18 or higher
+- A Firebase project with **Authentication** and **Firestore** enabled
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Clone / Download
 
-## Expanding the ESLint configuration
+```bash
+git clone https://github.com/NickTAM1/WebT4A1.git
+cd WebT4A1
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. Install Dependencies
+
+```bash
+npm install
+```
+
+4. Create a .env file
+
+Create a `.env` file in the project root:
+
+.env
+```bash
+VITE_FIREBASE_API_KEY=AIzaSyD5IuBKLFJN5sCTSkBr_tbZHT2tr6q_lNE
+VITE_FIREBASE_AUTH_DOMAIN=webt4-f9d4b.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=webt4-f9d4b
+VITE_FIREBASE_STORAGE_BUCKET=webt4-f9d4b.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=618619490178
+VITE_FIREBASE_APP_ID=1:618619490178:web:b5b7527e08e272f2c9899b
+
+VITE_GAME_URL=https://nicktam1.github.io/SponderBirdNew/
+```
+
+5. Run the Dev Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+Test Accounts
+
+Player: 
+```bash
+sponder@sponder.com
+spondersponder
+```   
+
+Admin: 
+```bash
+admin@admin.com
+123456789
+```  
+
+Github Link
+
+https://github.com/NickTAM1/WebT4A1.git

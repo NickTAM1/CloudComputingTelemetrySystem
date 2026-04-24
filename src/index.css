@@ -825,15 +825,279 @@ code {
     opacity: 0.7;
 }
 
+/* ── game-iframe (used in GamePortal) ── */
+.game-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    inset: 0;
+}
+
+    .game-iframe.hidden {
+        opacity: 0;
+    }
+
+    .game-iframe.visible {
+        opacity: 1;
+    }
+
+/* ── UserScreen ── */
+.user-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.profile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.profile-avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid rgba(232, 93, 42, 0.25);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.profile-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.profile-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.profile-role-badge {
+    display: inline-block;
+    margin-top: 0.2rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-full);
+}
+
+    .profile-role-badge.role-admin {
+        color: var(--gold);
+        background: rgba(212, 160, 23, 0.12);
+        border: 1px solid rgba(212, 160, 23, 0.3);
+    }
+
+    .profile-role-badge.role-player {
+        color: var(--secondary);
+        background: var(--secondary-subtle);
+        border: 1px solid rgba(78, 139, 95, 0.25);
+    }
+
+.profile-stats {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ── AdminDashboard ── */
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.admin-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    background: rgba(212, 160, 23, 0.12);
+    border: 1px solid rgba(212, 160, 23, 0.3);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+}
+
+.admin-stats-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-stat-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.admin-stat-label {
+    font-size: 0.65rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chart-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.chart-subtitle {
+    font-size: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-secondary);
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    height: 160px;
+    padding-bottom: 1.5rem;
+    position: relative;
+}
+
+.bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    height: 100%;
+    position: relative;
+}
+
+.bar-value {
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.bar-track {
+    flex: 1;
+    width: 100%;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.bar-fill {
+    width: 100%;
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    transition: height 0.4s ease;
+    opacity: 0.85;
+}
+
+    .bar-fill:hover {
+        opacity: 1;
+    }
+
+.bar-label {
+    position: absolute;
+    bottom: -1.4rem;
+    font-size: 0.6rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-align: center;
+}
+
+/* ── Responsive ── */
 @media (max-width: 600px) {
     .portal-header {
         padding: 0.6rem 1rem;
-    }
-
-    .stats-bar {
-        gap: 1rem;
-        padding: 0.75rem 1rem;
-        overflow-x: auto;
     }
 
     .tab-bar {
@@ -860,5 +1124,17 @@ code {
 
     .leader-games {
         display: none;
+    }
+
+    .admin-stats-row {
+        flex-direction: column;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-stats {
+        gap: 1rem;
     }
 }

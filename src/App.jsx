@@ -8,8 +8,8 @@ import GamePortal from './components/GamePortal';
 async function createUserProfileIfNeeded(firebaseUser) {
     const userRef = doc(db, "users", firebaseUser.uid);
     const snapshot = await getDoc(userRef);
-    
-    if(!snapshot.exists()) {
+
+    if (!snapshot.exists()) {
         await setDoc(userRef, {
             email: firebaseUser.email,
             displayname: firebaseUser.displayName || "Player",
@@ -17,40 +17,47 @@ async function createUserProfileIfNeeded(firebaseUser) {
             createdAt: serverTimestamp(),
             highscore: 0,
             gamesPlayed: 0,
-        })
-        console.log(`User ${firebaseUser.email} created.`)
+            role: "player",
+        });
+        console.log(`User ${firebaseUser.email} created.`);
     }
 }
 
-export default function App(){
+export default function App() {
     const [user, setUser] = useState(null);
+    const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 await createUserProfileIfNeeded(firebaseUser);
+                const userRef = doc(db, "users", firebaseUser.uid);
+                const snapshot = await getDoc(userRef);
+                setUserData(snapshot.exists() ? snapshot.data() : null);
                 setUser(firebaseUser);
-            }else {
+            } else {
                 setUser(null);
+                setUserData(null);
             }
             setLoading(false);
-        })
+        });
         return () => unsubscribe();
     }, []);
 
-    if(loading) {
+    if (loading) {
         return (
-            <div>
+            <div className="loading-screen">
+                <div className="spinner" />
                 <p>Checking auth state...</p>
             </div>
-        )
+        );
     }
 
-    return(
+    return (
         <div className="app">
-           {user ? <GamePortal user={user} /> : <LoginForm />}
+            {user ? <GamePortal user={user} userData={userData} /> : <LoginForm />}
         </div>
-    )
+    );
 }
 
