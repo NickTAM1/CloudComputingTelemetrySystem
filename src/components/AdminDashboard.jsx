@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
+import PyScoreChart from "./PyScoreChart";
 
 function BarChart({ data, valueKey, labelKey, color, title, subtitle }) {
     const max = Math.max(...data.map(d => d[valueKey]), 1);
@@ -178,6 +179,7 @@ export default function AdminDashboard() {
                     title={topSessionScoresData.length ? "Top Session Scores" : "Most Active Players"}
                     subtitle={topSessionScoresData.length ? "Highest scores across all sessions" : "Total games played"}
                 />
+                <PyScoreChart />
             </div>
         </div>
     );
