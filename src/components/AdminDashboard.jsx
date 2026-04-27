@@ -123,6 +123,9 @@ export default function AdminDashboard() {
     const avgScore = scores.length
         ? Math.round(scores.reduce((sum, s) => sum + Number(s.score || 0), 0) / scores.length)
         : 0;
+    const avgDuration = scores.length
+        ? Math.round(scores.reduce((sum, s) => sum + Number(s.durationSeconds ?? s.duration ?? 0), 0) / scores.length)
+        : 0;
 
     return (
         <div className="admin-dashboard">
@@ -141,19 +144,31 @@ export default function AdminDashboard() {
                     <span className="admin-stat-value">{totalGames}</span>
                 </div>
                 <div className="admin-stat-card">
-                    <span className="admin-stat-label">Avg High Score</span>
+                    <span className="admin-stat-label">Avg Session Score</span>
                     <span className="admin-stat-value">{avgScore.toLocaleString()}</span>
+                </div>
+                <div className="admin-stat-card">
+                    <span className="admin-stat-label">Avg Duration</span>
+                    <span className="admin-stat-value">{avgDuration}s</span>
                 </div>
             </div>
 
             <div className="charts-grid">
+                <BarChart
+                    data={newUsersData}
+                    valueKey="count"
+                    labelKey="label"
+                    color="#5B8DD9"
+                    title="New Players (Last 5 Weeks)"
+                    subtitle="Player registrations per week"
+                />
                 <BarChart
                     data={sessionsTrendData}
                     valueKey="count"
                     labelKey="label"
                     color="var(--secondary)"
                     title="Game Sessions (Last 7 Days)"
-                    subtitle="Live telemetry from Unity sessions"
+                    subtitle="Sessions recorded per day"
                 />
                 <BarChart
                     data={topSessionScoresData.length ? topSessionScoresData : topPlayersData}
@@ -161,7 +176,7 @@ export default function AdminDashboard() {
                     labelKey="label"
                     color="var(--accent)"
                     title={topSessionScoresData.length ? "Top Session Scores" : "Most Active Players"}
-                    subtitle={topSessionScoresData.length ? "Highest recorded Unity session scores" : "Total games played"}
+                    subtitle={topSessionScoresData.length ? "Highest scores across all sessions" : "Total games played"}
                 />
             </div>
         </div>

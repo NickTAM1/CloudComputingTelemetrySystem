@@ -1,4 +1,4 @@
-﻿import { readFileSync } from "fs";
+import { readFileSync } from "fs";
 import {resolve, dirname} from "path";
 import {fileURLToPath} from "url";
 import {initializeApp} from 'firebase/app';
@@ -33,7 +33,6 @@ try {
         const value = trimmed.slice(eqIndex + 1).trim();
         envVars[key] = value;
     }
-    //console.log(envVars);
 } catch (error) {
     console.error("Error");
 }
@@ -100,36 +99,33 @@ async function pushScores() {
             const score = randomInt(1, 42);
             const pipes = score;
             const timestamp = randomPastTimestamp();
-            
-            // Store the score in an array for later use (e.g., calculating high score)
+
             scores.push({score, pipes, timestamp});
 
-            // Add the score document to the "scores" collection
-            await addDoc(collection(db, "scores"), { // Use addDoc to create a new score document with an auto-generated ID
-                userId: player.id, // Reference to the player's ID
-                playerName: player.name, 
+            await addDoc(collection(db, "scores"), {
+                userId: player.id,
+                playerName: player.name,
                 playerPhoto: null,
                 score,
                 pipes,
-                duration: randomInt(10, 180), // Duration in seconds
+                duration: randomInt(10, 180),
                 timestamp,
-                isMock: true, // Flag to indicate this is mock data
-            
-            });
-    
-        }
-        const highScore = Math.max(...scores.map((s) => s.score)); // Calculate high score for the player
-        const memberSince = randomPastTimestamp(90); // Random member since date up to 90 days ago
+                isMock: true,
 
-        // Update the user's document with the high score and total games played
-        await setDoc(doc(db, "users", player.id), { // Use setDoc to create or overwrite the user document
+            });
+
+        }
+        const highScore = Math.max(...scores.map((s) => s.score));
+        const memberSince = randomPastTimestamp(90);
+
+        await setDoc(doc(db, "users", player.id), {
             email: player.email,
             displayname: player.name,
             photoURL: null,
             createdAt: memberSince,
             highscore: highScore,
-            gamesPlayed: sessionCount, // Total games played
-            isMock: true, // Flag to indicate this is mock data
+            gamesPlayed: sessionCount,
+            isMock: true,
         });
 
         console.log(`${player.name} -> ${sessionCount} game, ${highScore} high score.`);
@@ -141,7 +137,7 @@ async function pushScores() {
 
 async function clearMockData() {
     for(const player of MOCK_PLAYERS) {
-        await deleteDoc(doc(db, "users", player.id)); // Delete the user document
+        await deleteDoc(doc(db, "users", player.id));
 
     }
     const scoresQuery = query(
@@ -153,7 +149,7 @@ async function clearMockData() {
 
     let count = 0;
     for (const scoreDoc of scoresSnapshot.docs) {
-        await deleteDoc(scoreDoc.ref); // Delete each score document that matches the query
+        await deleteDoc(scoreDoc.ref);
         count++;
     }
     console.log(`Deleted ${count} scores :) :).`);
@@ -167,4 +163,4 @@ if(shouldClear) {
 }
 
 await pushScores();
-process.exit(0); // Exit the script after completion
+process.exit(0);

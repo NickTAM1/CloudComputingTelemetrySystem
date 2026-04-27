@@ -37,6 +37,7 @@ export default function GamePortal({ user, userData: initialUserData }) {
     const retryTimer = useRef(null);
     const authAcknowledged = useRef(false);
     const seenSessionIds = useRef(new Set());
+    const sessionStartRef = useRef(null);
 
     const persistTelemetry = useCallback(async (rawPayload) => {
         if (!user?.uid || !rawPayload) return;
@@ -54,7 +55,7 @@ export default function GamePortal({ user, userData: initialUserData }) {
         seenSessionIds.current.add(sessionId);
 
         const nowIso = new Date().toISOString();
-        const sessionStartIso = rawPayload.startTime || rawPayload.startedAt || nowIso;
+        const sessionStartIso = rawPayload.startTime || rawPayload.startedAt || sessionStartRef.current || nowIso;
         const sessionEndIso = rawPayload.endTime || rawPayload.endedAt || nowIso;
 
         const parsedStart = new Date(sessionStartIso);
@@ -112,7 +113,6 @@ export default function GamePortal({ user, userData: initialUserData }) {
                 projectId: FIREBASE_PROJECT_ID,
             };
             iframeRef.current.contentWindow.postMessage(payload, "*");
-            console.log("Auth token sent to iframe... waiting for ack");
         } catch (err) {
             console.error("Failed to send auth token to iframe", err);
         }
@@ -123,7 +123,6 @@ export default function GamePortal({ user, userData: initialUserData }) {
             if (event.source !== iframeRef.current?.contentWindow) return;
 
             if (event.data?.type === "firebase-auth-ack") {
-                console.log("Game acknowledged successful");
                 authAcknowledged.current = true;
                 if (retryTimer.current) {
                     clearInterval(retryTimer.current);
@@ -153,6 +152,7 @@ export default function GamePortal({ user, userData: initialUserData }) {
 
     const handleGameLoaded = useCallback(() => {
         setGameLoaded(true);
+        sessionStartRef.current = new Date().toISOString();
         authAcknowledged.current = false;
         sendAuthToGame();
         retryTimer.current = setInterval(sendAuthToGame, 2000);
@@ -160,9 +160,6 @@ export default function GamePortal({ user, userData: initialUserData }) {
             if (retryTimer.current) {
                 clearInterval(retryTimer.current);
                 retryTimer.current = null;
-                if (!authAcknowledged.current) {
-                    console.warn("Game never acknowledged auth after 30s. Did you put the FirebaseManager in the scene?");
-                }
             }
         }, 30000);
     }, [sendAuthToGame]);
