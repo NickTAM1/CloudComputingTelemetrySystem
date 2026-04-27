@@ -16,7 +16,7 @@ Getting Started
 2. Clone / Download
 
 ```bash
-git clone https://github.com/NickTAM1/WebT4A1.git
+git clone https://github.com/NickTAM1/CloudComputingTelemetrySystem.git
 cd WebT4A1
 ```
 
