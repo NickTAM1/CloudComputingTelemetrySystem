@@ -67,6 +67,7 @@ admin@admin.com
 Github Link
 https://github.com/NickTAM1/CloudComputingTelemetrySystem.git
 
-
+Demo video
+https://github.com/user-attachments/assets/a664c561-1ea7-4203-9e4a-ffd34cdf59fd
 
 
