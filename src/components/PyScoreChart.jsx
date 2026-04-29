@@ -3,11 +3,12 @@ import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import SCORE_CHART_PY from '../python/scoreChart.py?raw';
 
+// A global ish variable to store the Pyodide promise
 let pyodideReady = null;
 function getPyodide() {
     if (!pyodideReady) {
         pyodideReady = (async () => {
-            const pyodide = await globalThis.loadPyodide();
+            const pyodide = await globalThis.loadPyodide(); // Load the core WebAssembly Python runtime
             await pyodide.loadPackage(['matplotlib']);
             return pyodide;
         })();
@@ -16,7 +17,9 @@ function getPyodide() {
 }
 
 export default function PyScoreChart() {
-    const [status, setStatus] = useState('loading');
+
+    // Track UI state: 'loading', 'error', 'empty', or 'done'
+    const [status, setStatus] = useState('loading'); 
 
     useEffect(() => {
         (async () => {
@@ -43,7 +46,10 @@ export default function PyScoreChart() {
                     return;
                 }
 
+                // Bridge JS to Python: Store data on the window object so the Python script can access 'js.window'
                 window.__pyodideScoreData = JSON.stringify(data);
+
+                // Execute the imported Python code string
                 await pyodide.runPythonAsync(SCORE_CHART_PY);
                 setStatus('done');
             } catch (err) {
@@ -53,6 +59,7 @@ export default function PyScoreChart() {
         })();
     }, []);
 
+    
     return (
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
             <div className="chart-header">

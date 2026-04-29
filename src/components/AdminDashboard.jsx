@@ -4,6 +4,8 @@ import { db } from "../firebase";
 import PyScoreChart from "./PyScoreChart";
 
 function BarChart({ data, valueKey, labelKey, color, title, subtitle }) {
+    // Finds the highest value in the dataset to calculate relative bar heights
+    // The '1' ensures we don't divide by zero if the data is empty
     const max = Math.max(...data.map(d => d[valueKey]), 1);
 
     return (
@@ -45,15 +47,18 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Set up real time listener for the 'users' collection
         const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
             setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
 
+        // Set up real time listener for the 'scores' collection
         const unsubscribeScores = onSnapshot(collection(db, "scores"), (snapshot) => {
             setScores(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             setLoading(false);
         });
 
+        // Stop listening to the DB when the user leaves the admin page
         return () => {
             unsubscribeUsers();
             unsubscribeScores();
@@ -72,9 +77,11 @@ export default function AdminDashboard() {
     const weekBuckets = Array.from({ length: 5 }, (_, i) => ({ weeksAgo: i, count: 0 }));
     users.forEach(u => {
         if (!u.createdAt?.seconds) return;
+        // Convert Firestore timestamp to "weeks ago" integer
         const weeksAgo = Math.floor(
             (Date.now() - u.createdAt.seconds * 1000) / (7 * 24 * 60 * 60 * 1000)
         );
+        // Increment the count if the user joined within the 5 week window
         if (weeksAgo >= 0 && weeksAgo < 5) {
             weekBuckets[weeksAgo].count += 1;
         }
@@ -93,6 +100,7 @@ export default function AdminDashboard() {
         }));
 
     const today = new Date();
+    // Generate labels for the last 7 days (e.g., "Mon", "Tue", "Wed")
     const sessionsByDay = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
         d.setDate(today.getDate() - (6 - i));
@@ -100,6 +108,7 @@ export default function AdminDashboard() {
         return { key: d.toDateString(), label, count: 0 };
     });
 
+    // Count how many scores were submitted on each specific day
     scores.forEach((s) => {
         const dateValue = s.sessionEndAtIso || s.sessionStartAtIso;
         if (!dateValue) return;
